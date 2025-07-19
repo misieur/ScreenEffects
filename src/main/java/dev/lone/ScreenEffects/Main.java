@@ -21,8 +21,7 @@ import java.util.WeakHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public final class Main extends JavaPlugin implements Listener
-{
+public final class Main extends JavaPlugin implements Listener {
     private static Main inst;
 
     public static boolean IS_PAPER = false;
@@ -34,14 +33,12 @@ public final class Main extends JavaPlugin implements Listener
     private Command command;
     public static boolean showWarnOnJoin = false;
 
-    public static Main inst()
-    {
+    public static Main inst() {
         return inst;
     }
 
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         inst = this;
 
         Msg.setPrefix("[ScreenEffects] ");
@@ -68,43 +65,36 @@ public final class Main extends JavaPlugin implements Listener
      * 1.15.2, 1.16.5, 1.19.3
      * title = message
      * subtitle = image
-     *
+     * <p>
      * 1.17.1, 1.18.2
      * title = image
      * subtitle = message
-     *
+     * <p>
      * On some versions the rendering order of title and subtitle layers are inverted.
      */
-    public static boolean hasTitleBug(Player player)
-    {
-        if(Main.HAS_VIA_VERSION)
+    public static boolean hasTitleBug(Player player) {
+        if (Main.HAS_VIA_VERSION)
             return !ViaVersionWrapper.isVersionGreaterThan1_16_5(player);
         return !Main.is_v_17_more;
     }
 
-    private void extractDefaultStuff()
-    {
+    private void extractDefaultStuff() {
         CodeSource src = Main.class.getProtectionDomain().getCodeSource();
-        if (src != null)
-        {
+        if (src != null) {
             URL jar = src.getLocation();
             ZipInputStream zip = null;
-            try
-            {
+            try {
                 Msg.log(ChatColor.AQUA + "    Extracting default effects from .jar");
 
                 zip = new ZipInputStream(jar.openStream());
-                while (true)
-                {
+                while (true) {
                     ZipEntry e = zip.getNextEntry();
                     if (e == null)
                         break;
                     String name = e.getName();
-                    if (!e.isDirectory() && name.startsWith("contents/"))
-                    {
+                    if (!e.isDirectory() && name.startsWith("contents/")) {
                         File dest = new File((this.getDataFolder().getParent() + "/ItemsAdder/" + name).replace("/", File.separator));
-                        if (!dest.exists())
-                        {
+                        if (!dest.exists()) {
                             FileUtils.copyInputStreamToFile(this.getResource(name), dest);
                             Msg.log(ChatColor.AQUA + "       - Extracted " + name);
                             showWarnOnJoin = true;
@@ -113,33 +103,28 @@ public final class Main extends JavaPlugin implements Listener
                 }
                 Msg.log(ChatColor.GREEN + "      DONE extracting default effects from .jar");
 
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 Msg.error("        ERROR EXTRACTING DEFAULT effects! StackTrace:");
                 e.printStackTrace();
             }
         }
 
-        if(showWarnOnJoin)
-        {
+        if (showWarnOnJoin) {
             Msg.warn("Please don't forget to regen your resourcepack using /iazip command.");
         }
     }
 
     @EventHandler
-    public void onMove(PlayerMoveEvent e)
-    {
-        if(frozen.containsKey(e.getPlayer()))
+    public void onMove(PlayerMoveEvent e) {
+        if (frozen.containsKey(e.getPlayer()))
             e.setCancelled(true);
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent e)
-    {
-        if(!showWarnOnJoin)
+    public void onJoin(PlayerJoinEvent e) {
+        if (!showWarnOnJoin)
             return;
-        if(e.getPlayer().isOp())
-        {
+        if (e.getPlayer().isOp()) {
             Bukkit.getScheduler().runTaskLater(this, () -> {
                 Msg.message(e.getPlayer(), ChatColor.RED + "Please don't forget to regen your resourcepack using /iazip command.");
             }, 60L);
@@ -148,8 +133,7 @@ public final class Main extends JavaPlugin implements Listener
     }
 
     @EventHandler
-    private void onQuit(PlayerQuitEvent e)
-    {
+    private void onQuit(PlayerQuitEvent e) {
         command.sentTitles.remove(e.getPlayer());
     }
 }
